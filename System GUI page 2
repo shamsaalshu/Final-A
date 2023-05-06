@@ -1,0 +1,103 @@
+
+
+    def open_employee_page(self):
+        employee_page = tk.Toplevel(self.root)
+        employee_page.title("Employee Management")
+        # Display the employee data in the employee page
+        employee_listbox = tk.Listbox(employee_page)
+        employee_listbox.grid(row=6, columnspan=3, pady=10)
+
+        # Create and place the input fields and labels for employees
+        name_label = tk.Label(employee_page, text="Name:")
+        name_label.grid(row=0, column=0)
+        name_entry = tk.Entry(employee_page)
+        name_entry.grid(row=0, column=1)
+
+        id_label = tk.Label(employee_page, text="ID:")
+        id_label.grid(row=1, column=0)
+        id_entry = tk.Entry(employee_page)
+        id_entry.grid(row=1, column=1)
+
+        department_label = tk.Label(employee_page, text="Department:")
+        department_label.grid(row=2, column=0)
+        department_entry = tk.Entry(employee_page)
+        department_entry.grid(row=2, column=1)
+
+        job_title_label = tk.Label(employee_page, text="Job Title:")
+        job_title_label.grid(row=3, column=0)
+        job_title_var = tk.StringVar(employee_page)
+        job_title_var.set("Manager")
+        job_title_menu = tk.OptionMenu(employee_page, job_title_var, "Manager", "Salesperson")
+        job_title_menu.grid(row=3, column=1)
+
+        salary_label = tk.Label(employee_page, text="Basic Salary:")
+        salary_label.grid(row=4, column=0)
+        salary_entry = tk.Entry(employee_page)
+        salary_entry.grid(row=4, column=1)
+
+        # Create and place the buttons for employee management
+        add_employee_button = tk.Button(employee_page, text="Add Employee", command=add_employee_gui)
+        add_employee_button.grid(row=5, column=0)
+
+        delete_employee_button = tk.Button(employee_page, text="Delete Employee", command=delete_employee_gui)
+        delete_employee_button.grid(row=5, column=1)
+
+        modify_employee_button = tk.Button(employee_page, text="Modify Employee", command=modify_employee_gui)
+        modify_employee_button.grid(row=5, column=2)
+
+        # Create and place the buttons for employee management
+        # ...
+        # ...
+
+    def open_car_page(self):
+        car_page = tk.Toplevel(self.root)
+        car_page.title("Car Management")
+
+        # Create and place the input fields and labels for employees
+        name_label = tk.Label(car_page, text="Car Name:")
+        name_label.grid(row=0, column=0)
+        name_entry = tk.Entry(car_page)
+        name_entry.grid(row=0, column=1)
+
+        id_label = tk.Label(car_page, text="ID:")
+        id_label.grid(row=1, column=0)
+        id_entry = tk.Entry(car_page)
+        id_entry.grid(row=1, column=1)
+
+        price_label = tk.Label(car_page, text="Price :")
+        price_label.grid(row=2, column=0)
+        price_entry = tk.Entry(car_page)
+        price_entry.grid(row=2, column=1)
+
+
+        type_label = tk.Label(car_page, text="car type")
+        type_label.grid(row=4, column=0)
+        type_entry = tk.Entry(car_page)
+        type_entry.grid(row=4, column=1)
+
+        # Create and place the buttons for employee management
+        add_car_button = tk.Button(car_page, text="Add Car", command=add_car)
+        add_car_button.grid(row=5, column=0)
+
+        delete_car_button = tk.Button(car_page, text="Delete Car", command=delete_car)
+        delete_employee_button.grid(row=5, column=1)
+
+        modify_car_button = tk.Button(car_page, text="Modify Car", command=modify_car)
+        modify_car_button.grid(row=5, column=2)
+
+
+    def add_car(self):
+        # Implement the functionality to add an employee
+        pass
+
+    def delete_car(self):
+        # Implement the functionality to delete an employee
+        pass
+
+    def modify_car(self):
+        # Implement the functionality to modify an employee
+        pass
+
+
+if __name__ == '__main__':
+    gui = SystemGUI()
