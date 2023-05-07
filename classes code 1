@@ -1,0 +1,152 @@
+class Person:
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth):
+        self.__ID = ID
+        self.__firstName = firstName
+        self.__lastName = lastName
+        self.__phoneNumber = phoneNumber
+        self.__gender = gender
+        self.__dateOfBirth = dateOfBirth
+
+    def getID(self,ID):
+        self.__ID=ID
+
+
+    def setFirstName(self, firstName):
+        self.__firstName = firstName  # Set the first name of the person
+
+    def getFirstName(self):
+        return self.__firstName  # Get the first name of the person
+
+
+    # Last name
+    def setLastName(self, lastName):
+        self.__lastName = lastName  # Set the last name of the person
+
+    def getLastName(self):
+        return self.__lastName  # Get the last name of the person
+
+    def setPhoneNumber(self, phoneNumber):
+        self.__phoneNumber = phoneNumber
+    def getPhoneNumber(self):
+        return self.__phoneNumber
+
+    def setGender(self, gender):
+        if isinstance(gender, Gender):
+            self.__gender = gender
+        else:
+            raise ValueError("Invalid gender value")
+
+    def getGender(self):
+        return self.__gender
+
+    def getDateOfBirth(self):
+      return self.__dateOfBirth
+
+    def setDateOfBirth(self,dateOfBirth):
+      self.__dateOfBirth=dateOfBirth
+
+class Customer(Person):
+    def __init__(self,Vehicle):
+
+
+
+class Employee(Person):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        super().__init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
+        self.__jobTtile=jobTitle
+        self.__basicSalary=basicSalary
+
+    def setJobTitle(self,jobTitle):
+        self.__jobTtile=jobTitle
+    def getJobTitle(self):
+        return self.__jobTtile
+    def setBasicSalary(self,basicSalary):
+        self.__basicSalary=basicSalary
+    def getBasicSalary(self):
+        return self.__basicSalary
+
+class Manager(Employee):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary,salesPersons):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        self.__salesPersons=[]
+
+class SalesPerson(Employee):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary,manager,sales,customers):
+        super().__init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        self.manager=manager
+        self.__sales=sales
+        self.customers=[]
+
+class Color(Enum):
+    White = "White"
+    Black = "Black"
+    Gray  = "Gray"
+    Silver="Silver"
+    Red="Red"
+    Pink = "Pink"
+    Brown="Brown"
+    Orange ="Orange"
+
+
+class Vehicle:
+    def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model):
+        self.__ID=ID
+        self.__name=name
+        self.__price=price
+        self.__type=type
+        self.__maxSpeed=maxSpeed
+        self.__numOfDoors=numOfDoors
+        self.__numOfWheels=numOfWheels
+        self.__color=color
+        self.__model=model
+
+    def setID(self,ID):
+        self.__ID=ID
+
+    def getID(self, ID):
+        self.__ID = ID
+
+    def setName(self,name):
+        self.__name=name
+    def getName(self):
+        return self.__name
+    def setPrice(self,price):
+        self.__price=price
+    def getPrice(self):
+        return self.__price
+    def setType(self,type):
+        self.__type=type
+    def getType(self):
+        return self.__type
+    def setMaxSpeed(self,maxSpeed):
+        self.__maxSpeed=maxSpeed
+    def getMaxSpeed(self):
+        return self.__maxSpeed
+    def setNumOfDoor(self,numOfDoor):
+        self.__numOfDoors=numOfDoor
+    def getNumOfDoor(self):
+        return self.__numOfDoors
+    def setNumOfWheels(self,numOfWheels):
+        self.__numOfWheels=numOfWheels
+    def getNumOfWheels(self):
+        return self.__numOfWheels
+    def setModel(self,model):
+        self.__model=model
+    def getModel(self):
+        return self.__model
+
+    def setColor(self, color):
+        if isinstance(color, Color):
+            self.__color = color
+        else:
+            raise ValueError("Invalid gender value")
+
+    def getColor(self):
+        return self.__color
+
+class VehicleSale:
+    def __init__(self,salePerson,vechicle,customer,salePrice):
+        self.__salePerson=salePerson
+        self.__vechicle=vechicle
+        self.__customer=customer
+        self.__salePrice=salePrice
