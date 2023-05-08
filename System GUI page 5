@@ -69,7 +69,7 @@ class SystemGUI:
         self.table.heading('Department', text='Department')
         self.table.heading('Job Title', text='Job Title')
         self.table.heading('Basic Salary', text='Basic Salary')
-        self.table.grid(row=7, columnspan=3, pady=20)  # Use grid instead of pack
+        self.table.grid(row=7, columnspan=3, pady=20)
 
         with open("employee.dat", "rb") as f:
             emp_data = pickle.load(f)
@@ -223,7 +223,7 @@ selected_item):
         # Close the edit_employee_page
         name_entry.master.destroy()
 
-        employee_page.mainloop()
+
 
 
     def update_employee_listbox(self):
@@ -252,7 +252,7 @@ selected_item):
                                   values=(vehicle_id, vehicle_info['Name'], vehicle_info['price'], vehicle_type))
 
 
-        # Create and place the input fields and labels for employees
+        # Create and place the input fields and labels for vehicle
         name_label = tk.Label(vehicle_page, text="Name:")
         name_label.grid(row=0, column=0)
         name_entry = tk.Entry(vehicle_page)
@@ -390,7 +390,6 @@ selected_item):
                                     f"{vehicle_id}: {vehicle_info['Name']} - {vehicle_info['price']} - {vehicle_info['Type']}")
 
 
-        vehicle_page.mainloop()
 
 
 
