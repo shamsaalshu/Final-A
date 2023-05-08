@@ -1,0 +1,284 @@
+from enum import Enum
+import pickle
+
+class Gender(Enum):
+    MALE = "Male"
+    FEMALE = "Female"
+
+class CarCompany:
+    def __init__(self, name, telNumber, address):
+        self.name = name
+        self.telNumber = telNumber
+        self.address = address
+        self.__employees = {}
+        self.__sales = {}
+        self.__vehicle = {}
+
+        # Load data from binary files
+        try:
+            with open("vehicle.data", "rb") as f:
+                self.__vehicle = pickle.load(f)
+        except FileNotFoundError:
+            print("vehicle file does not exist")
+
+        try:
+            with open("sales.data", "rb") as f:
+                self.__sales = pickle.load(f)
+        except FileNotFoundError:
+            print("sales file does not exist")
+
+        try:
+            with open("employees.data", "rb") as f:
+                self.__employees = pickle.load(f)
+        except FileNotFoundError:
+            print("employees file does not exist")
+
+    def setName(self,name):
+      self.name=name
+    def getName(self):
+      return self.name
+    def setTelNumber(self,telNumber):
+      self.telNumber=telNumber
+    def getTelNumber(self):
+      return self.telNumber
+    def setAddress(self,address):
+      self.address=address
+    def getAddress(self):
+      return self.address
+
+    # Function to display employee details given an ID
+    def display_employee_details(self, employee_id):
+        try:
+            employee = self.__employees[employee_id]
+            return employee.SalesPerson_information()
+        except KeyError:
+            return "Employee not found"
+
+    # Function to display car details given an ID
+    def display_car_details(self, car_id):
+        try:
+            vehicle = self.__vehicle[car_id]
+            return VehicleSale.display_vehicle_details(vehicle)
+        except KeyError:
+            return "Car not found"
+
+    # Function to display sales details of an employee given an ID
+    def display_sales_details(self, employee_id):
+        try:
+            employee = self.__employees[employee_id]
+            if isinstance(employee, SalesPerson):
+                return VehicleSale.display_sales_details(employee_id, self.__employees)
+            else:
+                return "Employee is not a salesperson"
+        except KeyError:
+            return "Employee not found"
+
+
+class Person:
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth):
+        self.__ID = ID
+        self.__firstName = firstName
+        self.__lastName = lastName
+        self.__phoneNumber = phoneNumber
+        self.__gender = gender
+        self.__dateOfBirth = dateOfBirth
+
+    def getID(self,ID):
+        self.__ID=ID
+
+
+    def setFirstName(self, firstName):
+        self.__firstName = firstName  # Set the first name of the person
+
+    def getFirstName(self):
+        return self.__firstName  # Get the first name of the person
+
+
+    # Last name
+    def setLastName(self, lastName):
+        self.__lastName = lastName  # Set the last name of the person
+
+    def getLastName(self):
+        return self.__lastName  # Get the last name of the person
+
+    def setPhoneNumber(self, phoneNumber):
+        self.__phoneNumber = phoneNumber
+    def getPhoneNumber(self):
+        return self.__phoneNumber
+
+    def setGender(self, gender):
+        if isinstance(gender, Gender):
+            self.__gender = gender
+        else:
+            raise ValueError("Invalid gender value")
+
+    def getGender(self):
+        return self.__gender
+
+    def getDateOfBirth(self):
+      return self.__dateOfBirth
+
+    def setDateOfBirth(self,dateOfBirth):
+      self.__dateOfBirth=dateOfBirth
+
+class Customer(Person):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,vehicle):
+      super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
+      self.__vehicle = vehicle
+
+    def Customer_information(self):
+        return f"Customer Name: {self.getFirstName()} {self.getLastName()}, Phone: {self.getPhoneNumber()}, Vehicle: {self.__vehicle.getName()}"
+
+
+class Employee(Person):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
+        self.__jobTtile=jobTitle
+        self.__basicSalary=basicSalary
+
+    def setJobTitle(self,jobTitle):
+        self.__jobTtile=jobTitle
+    def getJobTitle(self):
+        return self.__jobTtile
+    def setBasicSalary(self,basicSalary):
+        self.__basicSalary=basicSalary
+    def getBasicSalary(self):
+        return self.__basicSalary
+
+class Manager(Employee):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary,salesPersons):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        self.__salesPersons=[]
+
+class SalesPerson(Employee):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary,manager,sales,customers):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        self.manager = manager
+        self.__sales = sales
+        self.customers = customers
+
+    def SalesPerson_information(self):
+        return f"Salesperson Name: {self.getFirstName()} {self.getLastName()}, Phone: {self.getPhoneNumber()}, Job Title: {self.getJobTitle()}, Basic Salary: {self.getBasicSalary()}"
+
+    def calculate_salesperson_commission(self):
+      total_commission = 0
+      for sale in self.__sales:
+          profit = sale.get_sale_price() - sale.get_vehicle().getPrice()
+          commission = profit * 0.065
+          total_commission += commission
+      return total_commission
+
+class Color(Enum):
+    White = "White"
+    Black = "Black"
+    Gray  = "Gray"
+    Silver="Silver"
+    Red="Red"
+    Pink = "Pink"
+    Brown="Brown"
+    Orange ="Orange"
+
+
+class Vehicle:
+    def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model):
+        self.__ID=ID
+        self.__name=name
+        self.__price=price
+        self.__type=type
+        self.__maxSpeed=maxSpeed
+        self.__numOfDoors=numOfDoors
+        self.__numOfWheels=numOfWheels
+        self.__color=color
+        self.__model=model
+
+    def setID(self,ID):
+        self.__ID=ID
+
+    def getID(self, ID):
+        self.__ID = ID
+
+    def setName(self,name):
+        self.__name=name
+    def getName(self):
+        return self.__name
+    def setPrice(self,price):
+        self.__price=price
+    def getPrice(self):
+        return self.__price
+    def setType(self,type):
+        self.__type=type
+    def getType(self):
+        return self.__type
+    def setMaxSpeed(self,maxSpeed):
+        self.__maxSpeed=maxSpeed
+    def getMaxSpeed(self):
+        return self.__maxSpeed
+    def setNumOfDoor(self,numOfDoor):
+        self.__numOfDoors=numOfDoor
+    def getNumOfDoor(self):
+        return self.__numOfDoors
+    def setNumOfWheels(self,numOfWheels):
+        self.__numOfWheels=numOfWheels
+    def getNumOfWheels(self):
+        return self.__numOfWheels
+    def setModel(self,model):
+        self.__model=model
+    def getModel(self):
+        return self.__model
+
+    def setColor(self, color):
+        if isinstance(color, Color):
+            self.__color = color
+        else:
+            raise ValueError("Invalid gender value")
+
+    def getColor(self):
+        return self.__color
+
+class ElectronicCar(Vehicle):
+    def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model,batteryCapacity,MaxDistanceSingleCharge,chargingTime):
+      super().__init__(ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model)
+      self.__batteryCapacity=batteryCapacity
+      self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+      self.__chargingTime=chargingTime
+
+    def setBatteryCapacity(self,batteryCapacity):
+      self.__batteryCapacity=batteryCapacity
+
+    def getBatteryCapacity(self):
+      return self.__batteryCapacity
+
+    def setMaxDistanceSingleCharge(self,MaxDistanceSingleCharge):
+      self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+    def getMaxDistanceSingleCharge(self):
+      return self.__MaxDistanceSingleCharge
+
+    def setChargingTime(self,chargingTime):
+      self.__chargingTime=chargingTime
+
+    def getChargingTime(self):
+      return self.__chargingTime
+
+class FuelCar(Vehicle):
+  def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model,fuelType,fuelCapacity):
+    super().__init__(ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model)
+    self.__fuelType=fuelType
+    self.__fuelCapacity=fuelCapacity
+  def setFuelType(self,fuelType):
+    self.__fuelType=fuelType
+  def getFuelType(self):
+    return self.__fuelType
+
+  def setFuelCapacity(self,fuelCapacity):
+    self.__fuelCapacity=fuelCapacity
+  def getFuelCapacity(self):
+    return self.__fuelCapacity
+
+
+
+class VehicleSale:
+    def __init__(self,salePerson,vechicle,customer,salePrice):
+        self.__salePerson=salePerson
+        self.__vechicle=vechicle
+        self.__customer=customer
+        self.__salePrice=salePrice
