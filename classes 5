@@ -1,0 +1,459 @@
+from enum import Enum
+import pickle
+
+class Gender(Enum):
+    MALE = "Male"
+    FEMALE = "Female"
+
+
+class BMCompany:
+    def __init__(self, name, tel_number, address):
+        self.name = name
+        self.tel_number = tel_number
+        self.address = address
+        self._employees = {}
+        self._sales = {}
+        self._vehicle = {}
+
+        # Load data from binary files
+        try:
+            with open("vehicle.data", "rb") as f:
+                self._vehicle = pickle.load(f)
+        except FileNotFoundError:
+            print("vehicle file does not exist")
+
+        try:
+            with open("sales.data", "rb") as f:
+                self._sales = pickle.load(f)
+        except FileNotFoundError:
+            print("sales file does not exist")
+
+        try:
+            with open("employees.data", "rb") as f:
+                self._employees = pickle.load(f)
+        except FileNotFoundError:
+            print("employees file does not exist")
+
+
+    def save_data(self):
+        with open("employees.data", "wb") as f:
+            pickle.dump(self._employees, f)
+        with open("vehicle.data", "wb") as f:
+            pickle.dump(self._vehicle, f)
+        with open("sales.data", "wb") as f:
+            pickle.dump(self._sales, f)
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
+    def set_tel_number(self, tel_number):
+        self.tel_number = tel_number
+
+    def get_tel_number(self):
+        return self.tel_number
+
+    def set_address(self, address):
+        self.address = address
+
+    def get_address(self):
+        return self.address
+
+    def add_employee(self, employee):
+        try:
+            employee_id = employee.getID()
+            if employee_id not in self._employees:
+                self._employees[employee_id] = employee
+                self.save_data()
+                return f"Employee {employee.getFirstName()} {employee.getLastName()} has been added."
+            else:
+                raise ValueError(f"Employee ID {employee_id} already exists.")
+        except ValueError as ve:
+            print(ve)
+
+    
+    def add_vehicle(self, vehicle):
+        try:
+            vehicle_id = vehicle.getID()
+            if vehicle_id not in self._vehicle:
+                self._vehicle[vehicle_id] = vehicle
+                self.save_data()
+                return f"Vehicle {vehicle.getName()} has been added."
+            else:
+                raise ValueError(f"Vehicle ID {vehicle_id} already exists.")
+        except ValueError as ve:
+            print(ve)
+
+    def add_sale(self, sales_person, vehicle, customer, sale_price, cost):
+        sales_person_id = sales_person.getID()
+        if sales_person_id not in self._employees or not isinstance(sales_person, SalesPerson):
+            return f"Invalid salesperson ID {sales_person_id}"
+
+        if not isinstance(vehicle, Vehicle) or vehicle.getID() not in self._vehicle:
+            return f"Invalid vehicle ID {vehicle.get_id()}"
+
+        sale = Sale(sales_person, vehicle, customer, sale_price, cost)
+        if sales_person_id not in self._sales:
+            self._sales[sales_person_id] = [sale]
+        else:
+            self._sales[sales_person_id].append(sale)
+    
+        return f"Sale added for {sales_person.getFirstName()} {sales_person.getLastName()} for {vehicle.getName()} to {customer.getFirstName()} {customer.getLastName()} for sale price {sale_price}."
+
+
+
+
+    def total_sales_profit(self): 
+        profit_sum = 0 
+        for sales in self._sales.values(): 
+            for sale in sales:
+                profit_sum += sale.profit
+        return profit_sum 
+
+    def sales_by_employee(self, employee): 
+        employee_sales = [] 
+        employee_id = employee.getID()
+        if employee_id in self._sales:
+            employee_sales = self._sales[employee_id]
+        return employee_sales 
+
+    def employee_profit_share(self, employee): 
+        employee_sales = self.sales_by_employee(employee)
+        profit_share_sum = 0 
+        for sale in employee_sales: 
+            profit_share_sum += sale.salesperson_share
+        return profit_share_sum
+
+    def calculate_salary(self, employee):
+        if isinstance(employee, SalesPerson):
+            sales = self.sales_by_employee(employee)
+            total_profit = sum(sale.profit() for sale in sales)
+            salary = employee.getBasicSalary() + total_profit * 0.065  # SalesPerson gets 6.5% of the profit
+        elif isinstance(employee, Manager):
+            salary = employee.getBasicSalary()
+            for sales_person in employee.get_salespersons():
+                sales = self.sales_by_employee(sales_person)
+                total_profit = sum(sale.profit() for sale in sales)
+                salary += total_profit * 0.035  # Manager gets 3.5% of the profit
+        else:
+            salary = employee.getBasicSalary()  # for other Employees
+        return salary
+
+    def employee_details(self, id):
+        employee = self._employees.get(id, None)
+        if employee:
+            details = f"Name: {employee.getFirstName()} {employee.getLastName()}\n"
+            details += f"Job Title: {employee.getJobTitle()}\n"
+            details += f"Basic Salary: {employee.getBasicSalary()}\n"
+            details += f"Calculated Salary: {self.calculate_salary(employee)}\n"
+            if isinstance(employee, SalesPerson):
+                details += f"Manager: {employee.get_manager().getFirstName()} {employee.get_manager().getLastName()}\n"
+            elif isinstance(employee, Manager):
+                details += f"Managed SalesPersons: {', '.join([sp.getFirstName() + ' ' + sp.getLastName() for sp in employee.get_salespersons()])}\n"
+            return details
+        else:
+            return f"No employee found with ID {id}"
+
+    def vehicle_details(self, id):
+        vehicle = self._vehicle.get(id, None)
+        if vehicle:
+            details = f"Name: {vehicle.getName()}\n"
+            details += f"Price: {vehicle.getPrice()}\n"
+            details += f"Type: {vehicle.getType()}\n"
+            details += f"Max Speed: {vehicle.getMaxSpeed()}\n"
+            details += f"Number of Doors: {vehicle.getNumOfDoor()}\n"
+            details += f"Number of Wheels: {vehicle.getNumOfWheels()}\n"
+            details += f"Color: {vehicle.getColor().value}\n"
+            details += f"Model: {vehicle.getModel()}\n"
+            return details
+        else:
+            return f"No vehicle found with ID {id}"
+
+    def print_all_sales(self):
+        for sales_person_id, sales in self._sales.items():
+            for sale in sales:
+                print(f"Salesperson: {sale.salesperson.getFullName()}")
+                print(f"Vehicle: {sale.vehicle.getName()}")
+                print(f"Customer: {sale.customer.getFullName()}")
+                print(f"Sale price: {sale.sale_price}")
+                print(f"Cost: {sale.cost}")
+                print(f"Profit: {sale.profit()}")
+                print("----------------------------")
+
+class Person:
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth):
+        self.__ID = ID
+        self.__firstName = firstName
+        self.__lastName = lastName
+        self.__phoneNumber = phoneNumber
+        self.__gender = gender
+        self.__dateOfBirth = dateOfBirth
+
+    def getID(self):
+        return self.__ID
+
+    def setFirstName(self, firstName):
+        self.__firstName = firstName  # Set the first name of the person
+
+    def getFirstName(self):
+        return self.__firstName  # Get the first name of the person
+    # Last name
+    def setLastName(self, lastName):
+        self.__lastName = lastName  # Set the last name of the person
+
+    def getLastName(self):
+        return self.__lastName  # Get the last name of the person
+
+    def setPhoneNumber(self, phoneNumber):
+        self.__phoneNumber = phoneNumber
+    def getPhoneNumber(self):
+        return self.__phoneNumber
+
+    def setGender(self, gender):
+        if isinstance(gender, Gender):
+            self.__gender = gender
+        else:
+            raise ValueError("Invalid gender value")
+
+    def getGender(self):
+        return self.__gender
+
+    def getDateOfBirth(self):
+      return self.__dateOfBirth
+
+    def setDateOfBirth(self,dateOfBirth):
+      self.__dateOfBirth=dateOfBirth
+
+    def getFullName(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __str__(self):
+       return f"ID: {self.getID()}, Name: {self.getFirstName()} {self.getLastName()}, Phone Number: {self.getPhoneNumber()},Gender: {self.getGender().value},Date of Birth: {self.getDateOfBirth()}"
+class Customer(Person):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,Vehicle):
+      super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
+      self.Vehicle=Vehicle
+
+    def __str__(self):
+        return f"Customer: {super().__str__()}"
+
+
+class Employee(Person):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
+        self.__jobTtile=jobTitle
+        self.__basicSalary=basicSalary
+
+    def setJobTitle(self,jobTitle):
+        self.__jobTtile=jobTitle
+    def getJobTitle(self):
+        return self.__jobTtile
+    def setBasicSalary(self,basicSalary):
+        self.__basicSalary=basicSalary
+    def getBasicSalary(self):
+        return self.__basicSalary
+
+    def __str__(self):
+        return f"Employee: {super().__str__()}, Job Title: {self.getJobTitle()}, Basic Salary: {self.getBasicSalary()}"
+
+
+class Manager(Employee):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        self.__salesPersons = []
+
+    def add_salesperson(self, salesperson):
+        if isinstance(salesperson, SalesPerson):
+            self.__salesPersons.append(salesperson)
+            salesperson.set_manager(self)
+        else:
+            raise ValueError("Invalid salesperson")
+
+    def get_salespersons(self):
+        return self.__salesPersons
+
+    def __str__(self):
+        salespersons = ", ".join([sp.getFirstName() + " " + sp.getLastName() for sp in self.get_salespersons()])
+        return f"Manager: {super().__str__()}, Salespersons: {salespersons}"
+
+
+class SalesPerson(Employee):
+    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        self.__manager = None
+        self.__sales = []
+        self.__customers = []
+
+    def set_manager(self, manager):
+        if isinstance(manager, Manager):
+            self.__manager = manager
+        else:
+            raise ValueError("Invalid manager")
+
+    def get_manager(self):
+        return self.__manager
+
+    def add_sale(self, sale):
+        self.__sales.append(sale)
+
+    def __str__(self):
+        return f"{self.salesperson.first_name} {self.salesperson.last_name} sold a {self.vehicle.make} {self.vehicle.model} to {self.customer.first_name} {self.customer.last_name} for {self.price} with a commission of ${self.commission}"
+
+    def get_sales(self):
+        return self.__sales
+
+    def total_sales(self):
+        return sum([sale.sale_price for sale in self.sales])
+
+        
+
+class Color(Enum):
+    White = "White"
+    Black = "Black"
+    Gray  = "Gray"
+    Silver="Silver"
+    Red="Red"
+    Pink = "Pink"
+    Brown="Brown"
+    Orange ="Orange"
+
+
+class Vehicle:
+    def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model):
+        self.__ID=ID
+        self.__name=name
+        self.__price=price
+        self.__type=type
+        self.__maxSpeed=maxSpeed
+        self.__numOfDoors=numOfDoors
+        self.__numOfWheels=numOfWheels
+        self.__color=color
+        self.__model=model
+
+    def setID(self,ID):
+        self.__ID=ID
+    def getID(self):
+        return self.__ID
+    def setName(self,name):
+        self.__name=name
+    def getName(self):
+        return self.__name
+    def setPrice(self,price):
+        self.__price=price
+    def getPrice(self):
+        return self.__price
+    def setType(self,type):
+        self.__type=type
+    def getType(self):
+        return self.__type
+    def setMaxSpeed(self,maxSpeed):
+        self.__maxSpeed=maxSpeed
+    def getMaxSpeed(self):
+        return self.__maxSpeed
+    def setNumOfDoor(self,numOfDoor):
+        self.__numOfDoors=numOfDoor
+    def getNumOfDoor(self):
+        return self.__numOfDoors
+    def setNumOfWheels(self,numOfWheels):
+        self.__numOfWheels=numOfWheels
+    def getNumOfWheels(self):
+        return self.__numOfWheels
+    def setModel(self,model):
+        self.__model=model
+    def getModel(self):
+        return self.__model
+
+    def setColor(self, color):
+        if isinstance(color, Color):
+            self.__color = color
+        else:
+            raise ValueError("Invalid gender value")
+
+    def getColor(self):
+        return self.__color
+
+class ElectronicCar(Vehicle):
+    def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model,batteryCapacity,MaxDistanceSingleCharge,chargingTime):
+      super().__init__(ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model)
+      self.__batteryCapacity=batteryCapacity
+      self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+      self.__chargingTime=chargingTime
+
+    def setBatteryCapacity(self,batteryCapacity):
+      self.__batteryCapacity=batteryCapacity
+
+    def getBatteryCapacity(self):
+      return self.__batteryCapacity
+
+    def setMaxDistanceSingleCharge(self,MaxDistanceSingleCharge):
+      self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+    def getMaxDistanceSingleCharge(self):
+      return self.__MaxDistanceSingleCharge
+
+    def setChargingTime(self,chargingTime):
+      self.__chargingTime=chargingTime
+
+    def getChargingTime(self):
+      return self.__chargingTime
+
+class FuelCar(Vehicle):
+    def __init__(self, ID, name, price, type, maxSpeed, numOfDoors, numOfWheels, color, model, fuelType, fuelCapacity):
+        super().__init__(ID, name, price, type, maxSpeed, numOfDoors, numOfWheels, color, model)
+        self.__fuelType = fuelType
+        self.__fuelCapacity = fuelCapacity
+
+    def setFuelType(self, fuelType):
+        self.__fuelType = fuelType
+
+    def getFuelType(self):
+        return self.__fuelType
+
+    def setFuelCapacity(self, fuelCapacity):
+        self.__fuelCapacity = fuelCapacity
+
+    def getFuelCapacity(self):
+        return self.__fuelCapacity
+
+
+class Sale:
+    def __init__(self, salesperson, vehicle, customer, sale_price, cost):
+        self.salesperson = salesperson
+        self.vehicle = vehicle
+        self.customer = customer
+        self.sale_price = sale_price
+        self.cost = cost
+
+    def profit(self):
+        return self.sale_price - self.cost
+
+    def salesperson_share(self):
+        # Salesperson gets 6.5% of the profit
+        return self.profit() * 0.065
+
+    def manager_share(self):
+        # Manager gets 3.5% of the profit
+        return self.profit() * 0.035
+
+    def company_share(self):
+        # Company gets the rest of the profit
+        return self.profit() - self.salesperson_share() - self.manager_share()
+
+    def sales_by_employee(self, employee):
+        if isinstance(employee, SalesPerson):
+            sales = []
+            for sale in self.sales:
+                if sale.salesperson == employee:
+                    sales.append(sale)
+            return sales
+        else:
+            return None
+
+
+
+    def __str__(self):
+        customer_name = self.customer.getFullName() if self.customer is not None else "Unknown"
+        for sale in sale:
+                  return f"{self.salesperson.getFullName()} sold a {self.vehicle.make} {self.vehicle.model} to {customer_name} for {self.price} with a commission of ${self.commission}"
+
