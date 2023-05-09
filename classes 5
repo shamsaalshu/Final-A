@@ -457,3 +457,257 @@ class Sale:
         for sale in sale:
                   return f"{self.salesperson.getFullName()} sold a {self.vehicle.make} {self.vehicle.model} to {customer_name} for {self.price} with a commission of ${self.commission}"
 
+def test_creation():
+    person = Person(1, "John", "Doe", "1234567890", Gender.MALE, "1990-01-01")
+    assert person.getFirstName() == "John"
+
+    employee = Employee(2, "Jane", "Doe", "0987654321", Gender.FEMALE, "1990-01-02", "Engineer", 5000)
+    assert employee.getJobTitle() == "Engineer"
+
+    manager = Manager(3, "Manager", "Name", "1122334455", Gender.MALE, "1980-01-01", "Manager", 8000)
+    assert manager.getBasicSalary() == 8000
+
+    sales_person = SalesPerson(4, "Sales", "Person", "5566778899", Gender.FEMALE, "1985-01-01", "SalesPerson", 3000)
+    assert sales_person.getJobTitle() == "SalesPerson"
+
+    vehicle = Vehicle(1, "Car", 50000, "Sedan", "200km/h", 4, 4, Color.Black, "2023")
+    assert vehicle.getName() == "Car"
+
+    company = BMCompany("Test Company", "1234567890", "Test Address")
+    assert company.get_name() == "Test Company"
+
+    company.add_employee(manager)
+    company.add_employee(sales_person)
+    assert company.employee_details(3) != "No employee found with ID 3"
+    assert company.employee_details(4) != "No employee found with ID 4"
+    
+    def test_add_vehicle():
+    company = BMCompany("Test Company", "1234567890", "Test Address")
+    vehicle = Vehicle(1, "Car", 50000, "Sedan", "200km/h", 4, 4, Color.Black, "2023")
+    assert company.add_vehicle(vehicle) == "Vehicle Car has been added."
+    
+    def test_add_sale():
+    company = BMCompany("Test Company", "1234567890", "Test Address")
+    sales_person = SalesPerson(4, "Sales", "Person", "5566778899", Gender.FEMALE, "1985-01-01", "SalesPerson", 3000)
+    company.add_employee(sales_person)
+    vehicle = Vehicle(1, "Car", 50000, "Sedan", "200km/h", 4, 4, Color.Black, "2023")
+    company.add_vehicle(vehicle)
+    assert company.add_sale(sales_person, vehicle, 60000, 50000) is None  # No output expected if operation is successful
+    
+    
+    def test_calculate_salary():
+    company = BMCompany("Test Company", "1234567890", "Test Address")
+    manager = Manager(3, "Manager", "Name", "1122334455", Gender.MALE, "1980-01-01", "Manager", 8000)
+    company.add_employee(manager)
+    assert company.calculate_salary(manager) == 8000  # No sales, so salary is just the base salary
+    
+    
+    def test_employee_details():
+    company = BMCompany("Test Company", "1234567890", "Test Address")
+    manager = Manager(3, "Manager", "Name", "1122334455", Gender.MALE, "1980-01-01", "Manager", 8000)
+    company.add_employee(manager)
+    details = company.employee_details(3)
+    assert "Manager" in details  # Check that manager's name is in the details
+    assert "8000" in details  # Check that manager's salary is in the details
+    
+    
+    def test_cases():
+    # Initialize the company
+    bm_company = BMCompany("BM Company", "1234567890", "123 Street, City, Country")
+
+    # Create some vehicles
+    vehicle1 = ElectronicCar(1, "Model S", 80000, "Electric", 150, 4, 4, Color.Black, "Tesla", 100, 500, 12)
+    vehicle2 = FuelCar(2, "Corolla", 20000, "Petrol", 120, 4, 4, Color.White, "Toyota", "Petrol", 50)
+
+    # Add vehicles to the company
+    print(bm_company.add_vehicle(vehicle1))
+    print(bm_company.add_vehicle(vehicle2))
+
+    # Create some employees
+    employee1 = Manager(1, "John", "Doe", "1234567890", Gender.MALE, "1980-01-01", "Manager", 5000)
+    employee2 = SalesPerson(2, "Jane", "Doe", "1234567890", Gender.FEMALE, "1985-01-01", "SalesPerson", 3000)
+
+    # Add employees to the company
+    print(bm_company.add_employee(employee1))
+    print(bm_company.add_employee(employee2))
+
+    # Manager adding salesperson
+    employee1.add_salesperson(employee2)
+
+    # Create some sales
+    sale1 = Sale(employee2, vehicle1, None, 85000, 80000)
+
+    # Add sales to the company
+    bm_company.add_sale(employee2, vehicle1, 85000, 80000)
+
+    # Test the print and display all the details of an employee, given the ID number
+    print("\nEmployee Details:")
+    print(bm_company.employee_details(1))
+    print(bm_company.employee_details(2))
+
+    # Test the print and display all the details of a car, given the ID number
+    print("\nVehicle Details:")
+    print(bm_company.vehicle_details(1))
+    print(bm_company.vehicle_details(2))
+
+
+
+test_cases()
+
+bm_company = BMCompany("BM Company", "123-456-7890", "123 Main Street")
+employee_id = 1
+employee_details = bm_company.employee_details(employee_id)
+print(employee_details)
+
+bm_company = BMCompany("BM Company", "123-456-7890", "123 Main Street")
+vehicle_id = 1
+vehicle_details = bm_company.vehicle_details(vehicle_id)
+print(vehicle_details)
+
+# create a BMCompany object
+company = BMCompany("ABC Company", "123-456-7890", "123 Main St")
+
+# create an Employee object
+employee = Employee("001", "John", "Doe", "555-555-5555", Gender.MALE, "1990-01-01", "Salesperson", 50000)
+
+# add the employee to the company
+company.add_employee(employee)
+
+# create a Vehicle object
+vehicle = Vehicle("001", "Car", 20000, "Gas", 100, 4, 4, Color.Black, "2022")
+
+# add the vehicle to the company
+company.add_vehicle(vehicle)
+
+# create a Customer object
+customer = Customer("001", "Jane", "Doe", "555-555-5555", Gender.FEMALE, "1990-01-01", vehicle)
+
+# create a SalesPerson object
+salesperson = SalesPerson("002", "Bob", "Smith", "555-555-5555", Gender.MALE, "1990-01-01", "Salesperson", 50000)
+
+# create a Manager object
+manager = Manager("003", "Sue", "Johnson", "555-555-5555", Gender.FEMALE, "1990-01-01", "Manager", 80000)
+
+# add the salesperson to the manager's team
+manager.add_salesperson(salesperson)
+
+# add a sale to the company
+company.add_sale(salesperson, vehicle, 25000,10000)
+
+# print employee details
+print(company.employee_details("001"))
+
+# print vehicle details
+print(company.vehicle_details("001"))
+
+# print total sales profit
+print(company.total_sales_profit())
+
+# print employee profit share
+print(company.employee_profit_share(salesperson))
+
+# calculate salary for an employee
+print(company.calculate_salary(salesperson))
+
+from enum import Enum
+from datetime import datetime
+import pickle
+
+# Define classes and functions here
+
+# Create a company instance
+company = BMCompany("My Company", "1234567890", "123 Main St.")
+
+# Add some employees
+employee1 = Manager("1001", "John", "Doe", "555-1234", Gender.MALE, datetime(1980, 1, 1), "Manager", 50000)
+employee2 = SalesPerson("1002", "Jane", "Smith", "555-5678", Gender.FEMALE, datetime(1990, 1, 1), "Salesperson", 25000)
+company.add_employee(employee1)
+company.add_employee(employee2)
+
+# Add some vehicles
+vehicle1 = FuelCar("2001", "Honda Civic", 20000, "Sedan", 120, 4, 4, Color.Black, "2021", "Gasoline", 12)
+vehicle2 = ElectronicCar("2002", "Tesla Model S", 80000, "Sedan", 150, 4, 4, Color.Red, "2021", 100, 400, 8)
+company.add_vehicle(vehicle1)
+company.add_vehicle(vehicle2)
+
+# Add some sales
+company.add_sale(employee2, vehicle1, 25000,100000)
+company.add_sale(employee2, vehicle2, 80000,100000)
+
+# Test the methods
+print(company.employee_details("1001"))  # Should print details of employee1
+print(company.vehicle_details("2001"))  # Should print details of vehicle1
+
+# Create a salesperson and a vehicle
+salesperson = SalesPerson("1001", "John", "Doe", "555-1234", Gender.MALE, datetime(1980, 1, 1), "Salesperson", 25000)
+vehicle = FuelCar("2001", "Honda Civic", 20000, "Sedan", 120, 4, 4, Color.Black, "2021", "Gasoline", 12)
+
+# Create some customers
+customer1 = Customer("3001", "Jane", "Smith", "555-5678", Gender.FEMALE, datetime(1990, 1, 1), vehicle)
+customer2 = Customer("3002", "Bob", "Johnson", "555-9876", Gender.MALE, datetime(1985, 1, 1), vehicle)
+
+# Create some sales
+sale1 = Sale(salesperson, vehicle, customer1, 25000, 15000)
+sale2 = Sale(salesperson, vehicle, customer2, 30000, 20000)
+
+# Test the sale methods
+print("Sale 1 profit:", sale1.profit())
+print("Sale 1 salesperson share:", sale1.salesperson_share())
+print("Sale 1 manager share:", sale1.manager_share())
+print("Sale 1 company share:", sale1.company_share())
+
+# Add the sales to the salesperson and print all sales by the salesperson
+salesperson.add_sale(sale1)
+salesperson.add_sale(sale2)
+
+for sale in salesperson.get_sales():
+    print(f"Salesperson ID: {sale.salesperson.getID()}, Vehicle ID: {sale.vehicle.getID()}, Customer ID: {sale.customer.getID()}, Sale Price: {sale.sale_price}, Profit: {sale.profit()}")
+
+
+bm_company = BMCompany("ABC Inc.", "0987654321", "456 Oak Avenue")
+
+# Create some salespeople and vehicles
+salesperson1 = SalesPerson("1001", "John", "Doe", "555-1234", Gender.MALE, datetime(1980, 1, 1), "Salesperson", 50000)
+salesperson2 = SalesPerson("1002", "Jane", "Doe", "555-5678", Gender.FEMALE, datetime(1985, 1, 1), "Salesperson", 20000)
+vehicle1 = FuelCar("2001", "Honda Civic", 20000, "Sedan", 120, 4, 4, Color.Black, "2021", "Gasoline", 12)
+vehicle2 = ElectronicCar("2002", "Tesla Model S", 80000, "Sedan", 250, 4, 5, Color.Red, "2021", 300,"3000km","3h")
+
+# Create some customers
+customer1 = Customer("3001", "Jane", "Smith", "555-5678", Gender.FEMALE, datetime(1990, 1, 1), vehicle1)
+customer2 = Customer("3002", "Bob", "Johnson", "555-9876", Gender.MALE, datetime(1985, 1, 1), vehicle1)
+customer3 = Customer("3003", "Alice", "Brown", "555-1111", Gender.FEMALE, datetime(1995, 1, 1), vehicle2)
+customer4 = Customer("3004", "Charlie", "Davis", "555-2222", Gender.MALE, datetime(1990, 1, 1), vehicle2)
+customer5 = Customer("3005", "Eve", "Wilson", "555-3333", Gender.FEMALE, datetime(1993, 1, 1), vehicle2)
+customer6 = Customer("3006", "Frank", "Garcia", "555-4444", Gender.MALE, datetime(1998, 1, 1), vehicle2)
+
+# Create some sales
+sale1 = Sale(salesperson1, vehicle1, customer1, 25000, 15000)
+sale2 = Sale(salesperson1, vehicle1, customer2, 30000, 20000)
+sale3 = Sale(salesperson2, vehicle2, customer3, 70000, 50000)
+sale4 = Sale(salesperson2, vehicle2, customer4, 75000, 55000)
+sale5 = Sale(salesperson2, vehicle2, customer5, 90000, 70000)
+sale6 = Sale(salesperson2, vehicle2, customer6, 100000, 80000)
+
+# Add the sales to the salespeople and the company
+salesperson1.add_sale(sale1)
+salesperson1.add_sale(sale2)
+salesperson2.add_sale(sale3)
+salesperson2.add_sale(sale4)
+salesperson2.add_sale(sale5)
+salesperson2.add_sale(sale6)
+
+
+bm_company.add_employee(salesperson1)
+bm_company.add_employee(salesperson2)
+
+bm_company.print_all_sales()
+
+# create some sales
+sale1 = Sale(salesperson1, vehicle1, customer1, 25000, 15000)
+sale2 = Sale(salesperson1, vehicle1, customer2, 30000, 20000)
+
+# add the sales to the company
+bm_company.add_sale(salesperson2, vehicle2, customer3, 70000, 50000)
+bm_company.add_sale(salesperson2, vehicle2, customer4, 75000, 55000)
+# print the contents of the _sales dictionary
+print(bm_company._sales)
