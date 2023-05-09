@@ -1,21 +1,24 @@
+# Import the required modules
 from enum import Enum
 import pickle
 
+# Define a Gender enumeration with two members
 class Gender(Enum):
     MALE = "Male"
     FEMALE = "Female"
 
-
+# Define a BMCompany class
 class BMCompany:
+    # Initialize the class with a name, telephone number, and address
     def __init__(self, name, tel_number, address):
         self.name = name
         self.tel_number = tel_number
         self.address = address
-        self._employees = {}
-        self._sales = {}
-        self._vehicle = {}
+        self._employees = {} # Initialize an empty dictionary for employees
+        self._sales = {}     # Initialize an empty dictionary for sales
+        self._vehicle = {}   # Initialize an empty dictionary for vehicles
 
-        # Load data from binary files
+        # Attempt to load data from binary files for employees, sales, and vehicles
         try:
             with open("vehicle.data", "rb") as f:
                 self._vehicle = pickle.load(f)
@@ -34,7 +37,7 @@ class BMCompany:
         except FileNotFoundError:
             print("employees file does not exist")
 
-
+    # Save data to binary files for employees, sales, and vehicles
     def save_data(self):
         with open("employees.data", "wb") as f:
             pickle.dump(self._employees, f)
@@ -43,68 +46,89 @@ class BMCompany:
         with open("sales.data", "wb") as f:
             pickle.dump(self._sales, f)
 
+    # Set the name of the company
     def set_name(self, name):
         self.name = name
 
+    # Get the name of the company
     def get_name(self):
         return self.name
 
+    # Set the telephone number of the company
     def set_tel_number(self, tel_number):
         self.tel_number = tel_number
 
+    # Get the telephone number of the company
     def get_tel_number(self):
         return self.tel_number
 
+    # Set the address of the company
     def set_address(self, address):
         self.address = address
 
+    # Get the address of the company
     def get_address(self):
         return self.address
 
+    # Add an employee to the company
     def add_employee(self, employee):
         try:
+            # Get the ID of the employee
             employee_id = employee.getID()
+            # If the employee ID does not exist in the _employees dictionary, add the employee
             if employee_id not in self._employees:
                 self._employees[employee_id] = employee
-                self.save_data()
+                self.save_data() # Save the updated data to binary files
                 return f"Employee {employee.getFirstName()} {employee.getLastName()} has been added."
             else:
+                # Raise a ValueError if the employee ID already exists
                 raise ValueError(f"Employee ID {employee_id} already exists.")
         except ValueError as ve:
             print(ve)
-
-    
+# Define a method to add a vehicle to the company
     def add_vehicle(self, vehicle):
         try:
+            # Get the ID of the vehicle
             vehicle_id = vehicle.getID()
+            # If the vehicle ID does not exist in the _vehicle dictionary, add the vehicle
             if vehicle_id not in self._vehicle:
                 self._vehicle[vehicle_id] = vehicle
-                self.save_data()
+                self.save_data() # Save the updated data to binary files
                 return f"Vehicle {vehicle.getName()} has been added."
             else:
+                # Raise a ValueError if the vehicle ID already exists
                 raise ValueError(f"Vehicle ID {vehicle_id} already exists.")
         except ValueError as ve:
             print(ve)
 
+    # Define a method to add a sale to the company
     def add_sale(self, sales_person, vehicle, customer, sale_price, cost):
+        # Get the ID of the sales person
         sales_person_id = sales_person.getID()
+        # If the sales person ID does not exist in the _employees dictionary, or if the sales person is not of type SalesPerson, return an error message
         if sales_person_id not in self._employees or not isinstance(sales_person, SalesPerson):
             return f"Invalid salesperson ID {sales_person_id}"
 
+        # If the vehicle is not of type Vehicle or if the vehicle ID does not exist in the _vehicle dictionary, return an error message
         if not isinstance(vehicle, Vehicle) or vehicle.getID() not in self._vehicle:
             return f"Invalid vehicle ID {vehicle.get_id()}"
 
+        # Create a new sale object with the provided information
         sale = Sale(sales_person, vehicle, customer, sale_price, cost)
+        # If the sales person ID does not exist in the _sales dictionary, add a new list containing the sale to the dictionary
         if sales_person_id not in self._sales:
             self._sales[sales_person_id] = [sale]
         else:
+            # Otherwise, append the sale to the existing list for the sales person
             self._sales[sales_person_id].append(sale)
     
+        # Return a success message with information about the sale that was added
         return f"Sale added for {sales_person.getFirstName()} {sales_person.getLastName()} for {vehicle.getName()} to {customer.getFirstName()} {customer.getLastName()} for sale price {sale_price}."
 
 
 
 
+# Define a method to calculate the total profit made by the company
     def total_sales_profit(self): 
         profit_sum = 0 
         for sales in self._sales.values(): 
@@ -112,13 +136,16 @@ class BMCompany:
                 profit_sum += sale.profit
         return profit_sum 
 
+    # Define a method to get all sales made by a specific employee
     def sales_by_employee(self, employee): 
         employee_sales = [] 
         employee_id = employee.getID()
+        # If the employee ID exists in the _sales dictionary, get all sales made by that employee
         if employee_id in self._sales:
             employee_sales = self._sales[employee_id]
         return employee_sales 
 
+    # Define a method to calculate the total profit share earned by a specific employee
     def employee_profit_share(self, employee): 
         employee_sales = self.sales_by_employee(employee)
         profit_share_sum = 0 
@@ -126,11 +153,14 @@ class BMCompany:
             profit_share_sum += sale.salesperson_share
         return profit_share_sum
 
+    # Define a method to calculate the salary of a specific employee
     def calculate_salary(self, employee):
+        # If the employee is of type SalesPerson, calculate their salary based on their basic salary and the total profit they made
         if isinstance(employee, SalesPerson):
             sales = self.sales_by_employee(employee)
             total_profit = sum(sale.profit() for sale in sales)
             salary = employee.getBasicSalary() + total_profit * 0.065  # SalesPerson gets 6.5% of the profit
+        # If the employee is of type Manager, calculate their salary based on their basic salary, the sales persons they manage, and the total profit made by those sales persons
         elif isinstance(employee, Manager):
             salary = employee.getBasicSalary()
             for sales_person in employee.get_salespersons():
@@ -141,6 +171,7 @@ class BMCompany:
             salary = employee.getBasicSalary()  # for other Employees
         return salary
 
+    # Define a method to get the details of a specific employee
     def employee_details(self, id):
         employee = self._employees.get(id, None)
         if employee:
@@ -156,9 +187,12 @@ class BMCompany:
         else:
             return f"No employee found with ID {id}"
 
+# Define a method to get the details of a specific vehicle
     def vehicle_details(self, id):
+        # Try to retrieve the vehicle with the given ID from the _vehicle dictionary
         vehicle = self._vehicle.get(id, None)
         if vehicle:
+            # If the vehicle exists, create a string with its details and return it
             details = f"Name: {vehicle.getName()}\n"
             details += f"Price: {vehicle.getPrice()}\n"
             details += f"Type: {vehicle.getType()}\n"
@@ -169,8 +203,10 @@ class BMCompany:
             details += f"Model: {vehicle.getModel()}\n"
             return details
         else:
+            # If the vehicle does not exist, return a message stating that it was not found
             return f"No vehicle found with ID {id}"
 
+    # Define a method to print details of all sales made by the company
     def print_all_sales(self):
         for sales_person_id, sales in self._sales.items():
             for sale in sales:
@@ -182,8 +218,10 @@ class BMCompany:
                 print(f"Profit: {sale.profit()}")
                 print("----------------------------")
 
+
 class Person:
     def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth):
+      # Initialize a Person object with the given parameters
         self.__ID = ID
         self.__firstName = firstName
         self.__lastName = lastName
@@ -191,7 +229,7 @@ class Person:
         self.__gender = gender
         self.__dateOfBirth = dateOfBirth
 
-    def getID(self):
+    def getID(self):# get the  id of the person
         return self.__ID
 
     def setFirstName(self, firstName):
@@ -225,89 +263,120 @@ class Person:
 
     def setDateOfBirth(self,dateOfBirth):
       self.__dateOfBirth=dateOfBirth
-
+# Get the full name of the person
     def getFullName(self):
         return f"{self.first_name} {self.last_name}"
-
+# Return a string representation of the person
     def __str__(self):
        return f"ID: {self.getID()}, Name: {self.getFirstName()} {self.getLastName()}, Phone Number: {self.getPhoneNumber()},Gender: {self.getGender().value},Date of Birth: {self.getDateOfBirth()}"
+       
 class Customer(Person):
-    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,Vehicle):
-      super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
-      self.Vehicle=Vehicle
+    def __init__(self, ID, firstName, lastName, phoneNumber, gender, dateOfBirth, Vehicle):
+        # Call the constructor of the parent class to initialize the common attributes
+        super().__init__(ID, firstName, lastName, phoneNumber, gender, dateOfBirth)
+        # Set the Vehicle attribute specific to the Customer class
+        self.Vehicle = Vehicle
 
     def __str__(self):
+        # Return a formatted string with the customer details
         return f"Customer: {super().__str__()}"
 
-
 class Employee(Person):
-    def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
-        super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth)
-        self.__jobTtile=jobTitle
-        self.__basicSalary=basicSalary
+    def __init__(self, ID, firstName, lastName, phoneNumber, gender, dateOfBirth, jobTitle, basicSalary):
+        # Call the constructor of the parent class to initialize the common attributes
+        super().__init__(ID, firstName, lastName, phoneNumber, gender, dateOfBirth)
+        # Set the jobTitle and basicSalary attributes specific to the Employee class
+        self.__jobTtile = jobTitle
+        self.__basicSalary = basicSalary
 
-    def setJobTitle(self,jobTitle):
-        self.__jobTtile=jobTitle
+    def setJobTitle(self, jobTitle):
+        # Set the jobTitle attribute of the Employee
+        self.__jobTtile = jobTitle
+
     def getJobTitle(self):
+        # Get the jobTitle attribute of the Employee
         return self.__jobTtile
-    def setBasicSalary(self,basicSalary):
-        self.__basicSalary=basicSalary
+
+    def setBasicSalary(self, basicSalary):
+        # Set the basicSalary attribute of the Employee
+        self.__basicSalary = basicSalary
+
     def getBasicSalary(self):
+        # Get the basicSalary attribute of the Employee
         return self.__basicSalary
 
     def __str__(self):
+        # Return a formatted string with the employee details
         return f"Employee: {super().__str__()}, Job Title: {self.getJobTitle()}, Basic Salary: {self.getBasicSalary()}"
-
-
 class Manager(Employee):
     def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        # Call the __init__() method of the parent class (Employee)
         super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        # Initialize the salespersons list for the manager
         self.__salesPersons = []
 
     def add_salesperson(self, salesperson):
+        # Check if the argument is an instance of the SalesPerson class
         if isinstance(salesperson, SalesPerson):
+            # Add the salesperson to the manager's salespersons list
             self.__salesPersons.append(salesperson)
+            # Set the salesperson's manager to the current manager instance
             salesperson.set_manager(self)
         else:
+            # Raise a ValueError if the argument is not a SalesPerson instance
             raise ValueError("Invalid salesperson")
 
     def get_salespersons(self):
+        # Return the list of salespersons under the manager
         return self.__salesPersons
 
     def __str__(self):
+        # Create a comma-separated string of the names of the manager's salespersons
         salespersons = ", ".join([sp.getFirstName() + " " + sp.getLastName() for sp in self.get_salespersons()])
+        # Return a string with the manager's information and the list of salespersons
         return f"Manager: {super().__str__()}, Salespersons: {salespersons}"
 
 
 class SalesPerson(Employee):
     def __init__(self,ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary):
+        # Call the __init__() method of the parent class (Employee)
         super().__init__(ID,firstName,lastName,phoneNumber,gender,dateOfBirth,jobTitle,basicSalary)
+        # Initialize empty lists for the sales and customers of the salesperson
         self.__manager = None
         self.__sales = []
         self.__customers = []
 
     def set_manager(self, manager):
+        # Check if the argument is an instance of the Manager class
         if isinstance(manager, Manager):
+            # Set the manager for the salesperson
             self.__manager = manager
         else:
+            # Raise a ValueError if the argument is not a Manager instance
             raise ValueError("Invalid manager")
 
     def get_manager(self):
+        # Return the manager of the salesperson
         return self.__manager
 
     def add_sale(self, sale):
+        # Add a sale to the sales list of the salesperson
         self.__sales.append(sale)
 
     def __str__(self):
+        # Create a string representation of the sale made by the salesperson
         return f"{self.salesperson.first_name} {self.salesperson.last_name} sold a {self.vehicle.make} {self.vehicle.model} to {self.customer.first_name} {self.customer.last_name} for {self.price} with a commission of ${self.commission}"
 
     def get_sales(self):
+        # Return the list of sales made by the salesperson
         return self.__sales
 
     def total_sales(self):
+        # Calculate and return the total sales amount made by the salesperson
         return sum([sale.sale_price for sale in self.sales])
 
         
+#creating enumenator for the color
 
 class Color(Enum):
     White = "White"
@@ -319,9 +388,11 @@ class Color(Enum):
     Brown="Brown"
     Orange ="Orange"
 
-
+#Defines the class Vehicle, which is the base class for all types of vehicles.
 class Vehicle:
+  #Constructor initializes the Vehicle object with its unique ID, name, price, type, maximum speed, number of doors, number of wheels, color, and model.
     def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model):
+      #All the instance variables are private and can be accessed or modified only through getter and setter methods.
         self.__ID=ID
         self.__name=name
         self.__price=price
@@ -331,7 +402,7 @@ class Vehicle:
         self.__numOfWheels=numOfWheels
         self.__color=color
         self.__model=model
-
+#seter and geter method of the attributes 
     def setID(self,ID):
         self.__ID=ID
     def getID(self):
@@ -376,30 +447,33 @@ class Vehicle:
 
 class ElectronicCar(Vehicle):
     def __init__(self,ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model,batteryCapacity,MaxDistanceSingleCharge,chargingTime):
-      super().__init__(ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model)
-      self.__batteryCapacity=batteryCapacity
-      self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
-      self.__chargingTime=chargingTime
+        # Call the constructor of the parent class
+        super().__init__(ID,name,price,type,maxSpeed,numOfDoors,numOfWheels,color,model)
+        self.__batteryCapacity=batteryCapacity
+        self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+        self.__chargingTime=chargingTime
 
     def setBatteryCapacity(self,batteryCapacity):
-      self.__batteryCapacity=batteryCapacity
+        self.__batteryCapacity=batteryCapacity
 
     def getBatteryCapacity(self):
-      return self.__batteryCapacity
+        return self.__batteryCapacity
 
     def setMaxDistanceSingleCharge(self,MaxDistanceSingleCharge):
-      self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+        self.__MaxDistanceSingleCharge=MaxDistanceSingleCharge
+
     def getMaxDistanceSingleCharge(self):
-      return self.__MaxDistanceSingleCharge
+        return self.__MaxDistanceSingleCharge
 
     def setChargingTime(self,chargingTime):
-      self.__chargingTime=chargingTime
+        self.__chargingTime=chargingTime
 
     def getChargingTime(self):
-      return self.__chargingTime
+        return self.__chargingTime
 
 class FuelCar(Vehicle):
     def __init__(self, ID, name, price, type, maxSpeed, numOfDoors, numOfWheels, color, model, fuelType, fuelCapacity):
+        # Call the constructor of the parent class
         super().__init__(ID, name, price, type, maxSpeed, numOfDoors, numOfWheels, color, model)
         self.__fuelType = fuelType
         self.__fuelCapacity = fuelCapacity
@@ -426,21 +500,23 @@ class Sale:
         self.cost = cost
 
     def profit(self):
+        # Calculate the profit from the sale
         return self.sale_price - self.cost
 
     def salesperson_share(self):
-        # Salesperson gets 6.5% of the profit
+        # Calculate the salesperson's share (6.5% of the profit)
         return self.profit() * 0.065
 
     def manager_share(self):
-        # Manager gets 3.5% of the profit
+        # Calculate the manager's share (3.5% of the profit)
         return self.profit() * 0.035
 
     def company_share(self):
-        # Company gets the rest of the profit
+        # Calculate the company's share (rest of the profit)
         return self.profit() - self.salesperson_share() - self.manager_share()
 
     def sales_by_employee(self, employee):
+        # Return a list of sales made by a specific salesperson
         if isinstance(employee, SalesPerson):
             sales = []
             for sale in self.sales:
@@ -450,12 +526,12 @@ class Sale:
         else:
             return None
 
-
-
     def __str__(self):
+        # Return a string representation of the sale
         customer_name = self.customer.getFullName() if self.customer is not None else "Unknown"
         for sale in sale:
                   return f"{self.salesperson.getFullName()} sold a {self.vehicle.make} {self.vehicle.model} to {customer_name} for {self.price} with a commission of ${self.commission}"
+        # This line is incorrect and should be removed
 
 def test_creation():
     person = Person(1, "John", "Doe", "1234567890", Gender.MALE, "1990-01-01")
