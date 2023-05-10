@@ -1,0 +1,736 @@
+# import tkinter for GUI, ttk for themed widgets and messagebox for popup messages
+import tkinter as tk
+from tkinter import ttk
+import tkinter.messagebox as messagebox
+# import pickle for data serialization and deserialization
+import pickle
+
+# dictionary for employee
+
+employee_data = {
+    '12345': {'Name': 'John Doe', 'ID': '12345', 'Department': 'HR', 'Job Title': 'Manager', 'Basic Salary': '50000',
+              'Gender': 'Male', 'Birthday': '1980-01-01', 'Phone Number': '555-1234', 'Experience': '10 years',
+              'Passport Details': 'AB123456'},
+
+    '67890': {'Name': 'Jane Smith', 'ID': '67890', 'Department': 'Marketing', 'Job Title': 'Marketing Coordinator',
+              'Basic Salary': '35000', 'Gender': 'Female', 'Birthday': '1990-05-15', 'Phone Number': '555-5678' ,
+              'Experience': '5 years', 'Passport Details': 'EF456789'},
+
+    '39119': {'Name': 'Mark Jones', 'ID': '39119', 'Department': 'IT', 'Job Title': 'Salesperson', 'Basic Salary': '26000',
+              'Gender': 'Male', 'Birthday': '1995-02-02', 'Phone Number': '987654321', 'Experience': '3 years',
+              'Passport Details': 'CD789012'}
+}
+
+
+
+
+
+
+
+
+#open file for binary wrting
+employee_file=open('employee.dat','wb')
+pickle.dump(employee_data,employee_file)
+employee_file.close()
+
+vehicle_data = {
+    "VX3": {"Name": "Jazz VX3", "ID": "VX3", "price": 55000,
+            "Type": "Hatch", "Color": "Red", "Max Speed": 180,
+            "Number of Doors": 5, "Model": "2023", "Fuel Type": "Electric",
+            "Number of Wheels": 4,"Shape":"motorbike"},
+    "SX3": {"Name": "Mark3 SX3", "ID": "SX3", "price": 84000,
+            "Type": "Sedan", "Color": "Green", "Max Speed": 200,
+            "Number of Doors": 4, "Model": "2023", "Fuel Type": "fuel",
+            "Number of Wheels": 4,"Shape": "truck"},
+    "ZX3": {"Name": "Wagoner ZX3", "ID": "ZX3", "price": 125000,
+            "Type": "SUV", "Color": "Blue", "Max Speed": 220, "Number of Doors": 5,
+            "Model": "2023", "Fuel Type": "Electric", "Number of Wheels": 4,"Shape": "truck"}
+}
+
+
+
+
+vehicle_file=open('vehicle.dat','wb')
+pickle.dump(vehicle_data, vehicle_file)
+vehicle_file.close()
+
+
+# Define SystemGUI class for creating a graphical user interface for a sales system
+class SystemGUI:
+    def __init__(self):
+        # Initialize main window
+        self.root = tk.Tk()
+        self.root.geometry("300x200")
+        self.root.title("BMCompany Sales System")
+
+        # Create buttons for managing employees and vehicles
+        self.employee_button = tk.Button(self.root, text="Employee Management", command=self.open_employee_page)
+        self.employee_button.pack()
+
+        self.vehicle_button = tk.Button(self.root, text="vehicle Management", command=self.open_vehicle_page)
+        self.vehicle_button.pack()
+
+        # Start the Tkinter main event loop
+        self.root.mainloop()
+
+    # Define method for opening employee page
+    def open_employee_page(self):
+        employee_page = tk.Toplevel(self.root)
+        employee_page.title("Employee Management")
+
+        self.table = ttk.Treeview(employee_page,columns=('ID', 'Name', 'Department', 'Job Title', 'Basic Salary',
+                                                         'Gender', 'Birthday','Phone Number', 'Experience',
+                                                         'Passport Details'),
+                                  show='headings')
+        self.table.heading('ID', text='ID')
+        self.table.heading('Name', text='Name')
+        self.table.heading('Department', text='Department')
+        self.table.heading('Job Title', text='Job Title')
+        self.table.heading('Basic Salary', text='Basic Salary')
+        self.table.heading('Gender', text='Gender')
+        self.table.heading('Birthday', text='Birthday')
+        self.table.heading('Phone Number', text='Phone Number')
+        self.table.heading('Experience', text='Experience')
+        self.table.heading('Passport Details', text='Passport Details')
+
+        self.table.grid(row=11, columnspan=3, pady=20)
+
+        self.table.column('ID', width=100)
+        self.table.column('Name', width=150)
+        self.table.column('Department', width=150)
+        self.table.column('Job Title', width=150)
+        self.table.column('Basic Salary', width=120)
+        self.table.column('Gender', width=100)
+        self.table.column('Birthday', width=120)
+        self.table.column('Phone Number', width=150)
+        self.table.column('Experience', width=100)
+        self.table.column('Passport Details', width=150)
+
+        with open("employee.dat", "rb") as f:
+            emp_data = pickle.load(f)
+            for emp_id, emp_info in emp_data.items():
+                try:
+                    self.table.insert('', 'end', values=(emp_id, emp_info['Name'], emp_info['Department'],
+                                                         emp_info['Job Title'], emp_info['Basic Salary'],
+                                                         emp_info['Gender'], emp_info['Birthday'],
+                                                         emp_info['Phone Number'], emp_info['Experience'],
+                                                         emp_info['Passport Details']))
+                except KeyError:
+                    print(f"Missing key for employee ID {emp_id}: {emp_info}")
+                    raise
+
+        # Create and place the input fields and labels for employees
+        name_label = tk.Label(employee_page, text="Name:")
+        name_label.grid(row=0, column=0)
+        name_entry = tk.Entry(employee_page)
+        name_entry.grid(row=0, column=1)
+
+        id_label = tk.Label(employee_page, text="ID:")
+        id_label.grid(row=1, column=0)
+        id_entry = tk.Entry(employee_page)
+        id_entry.grid(row=1, column=1)
+
+        department_label = tk.Label(employee_page, text="Department:")
+        department_label.grid(row=2, column=0)
+        department_entry = tk.Entry(employee_page)
+        department_entry.grid(row=2, column=1)
+
+        job_title_label = tk.Label(employee_page, text="Job Title:")
+        job_title_label.grid(row=3, column=0)
+        job_title_var = tk.StringVar(employee_page)
+        job_title_var.set("Manager")
+        job_title_menu = tk.OptionMenu(employee_page, job_title_var, "Manager", "Salesperson", "sales Manager,",
+                                       "customer Service", "Service Technicians")
+        job_title_menu.grid(row=3, column=1)
+
+        salary_label = tk.Label(employee_page, text="Basic Salary:")
+        salary_label.grid(row=4, column=0)
+        salary_entry = tk.Entry(employee_page)
+        salary_entry.grid(row=4, column=1)
+
+        gender_label = tk.Label(employee_page, text="Gender:")
+        gender_label.grid(row=5, column=0)
+        gender_var = tk.StringVar(employee_page)
+        gender_var.set("Male")
+        gender_menu = tk.OptionMenu(employee_page, gender_var, "Male", "Female")
+        gender_menu.grid(row=5, column=1)
+
+        # Create and place the buttons for employee management
+        birthday_label = tk.Label(employee_page, text="Birthday:")
+        birthday_label.grid(row=6, column=0)
+        birthday_entry = tk.Entry(employee_page)
+        birthday_entry.grid(row=6, column=1)
+
+        phone_number_label = tk.Label(employee_page, text="Phone Number:")
+        phone_number_label.grid(row=7, column=0)
+        phone_number_entry = tk.Entry(employee_page)
+        phone_number_entry.grid(row=7, column=1)
+
+        experience_label = tk.Label(employee_page, text="Experience:")
+        experience_label.grid(row=8, column=0)
+        experience_entry = tk.Entry(employee_page)
+        experience_entry.grid(row=8, column=1)
+
+        passport_label = tk.Label(employee_page, text="Passport Details:")
+        passport_label.grid(row=9, column=0)
+        passport_entry = tk.Entry(employee_page)
+        passport_entry.grid(row=9, column=1)
+
+        add_button = tk.Button(employee_page, text="Add",
+                               command=lambda: self.add_employee(name_entry, id_entry, department_entry, job_title_var,
+                                                                 salary_entry, gender_var, birthday_entry,
+                                                                 phone_number_entry, experience_entry, passport_entry))
+        add_button.grid(row=13, column=0, padx=11, pady=11)
+
+        delete_button = tk.Button(employee_page, text="Delete", command=self.delete_employee)
+        delete_button.grid(row=13, column=1, padx=11, pady=11)
+
+        modify_button = tk.Button(employee_page, text="Modify", command=self.modify_employee)
+        modify_button.grid(row=13, column=2, padx=11, pady=11)
+
+        # Add Back to Home Page button
+        back_button = tk.Button(employee_page, text="Back to Home Page", command=employee_page.destroy)
+        back_button.grid(row=14, column=1, padx=11, pady=11)
+
+    def add_employee(self, name_entry, id_entry, department_entry, job_title_var, salary_entry, gender_var,
+                     birthday_entry, phone_number_entry, experience_entry, passport_entry):
+
+        name = name_entry.get()
+        emp_id = id_entry.get()
+        department = department_entry.get()
+        job_title = job_title_var.get()
+        gender = gender_var.get()
+        basic_salary = salary_entry.get()
+        birthday = birthday_entry.get()
+        phone_number = phone_number_entry.get()
+        experience = experience_entry.get()
+        passport_details = passport_entry.get()
+
+        # Check if any fields are empty
+        if not (
+                name_entry.get() and id_entry.get() and department_entry.get() and job_title_var.get() and salary_entry.get() and gender_var.get() and birthday_entry.get() and phone_number_entry.get() and experience_entry.get() and passport_entry.get()):
+            tk.messagebox.showinfo("Input Error", "Please fill all fields.")
+            return
+
+        # Add new employee data to employee_data dictionary
+        employee_data[emp_id] = {"Name": name, "ID": emp_id, "Department": department, "Job Title": job_title,
+                                 "Basic Salary": basic_salary, "Gender": gender, "Birthday": birthday,
+                                 "Phone Number": phone_number, "Experience": experience,
+                                 "Passport Details": passport_details}
+
+        # Save updated employee_data to the file
+        with open('employee.dat', 'wb') as employee_file:
+            pickle.dump(employee_data, employee_file)
+
+        # Insert the new data into the table
+        self.table.insert('', 'end', values=(
+        emp_id, name, department, job_title, basic_salary, gender, birthday, phone_number, experience,
+        passport_details))
+
+        # Clear the input fields after adding the employee
+        name_entry.delete(0, tk.END)
+        id_entry.delete(0, tk.END)
+        department_entry.delete(0, tk.END)
+        job_title_var.set("Manager")
+        gender_var.set("Male")
+        birthday_entry.delete(0, tk.END)
+        salary_entry.delete(0, tk.END)
+        phone_number_entry.delete(0, tk.END)
+        experience_entry.delete(0, tk.END)
+        passport_entry.delete(0, tk.END)
+
+    def delete_employee(self):
+        # get the currently selected item in the table
+        selected_item = self.table.selection()[0]
+        # get the employee ID from the selected item
+        selected_employee_id = self.table.item(selected_item, 'values')[0]
+
+        # Delete the employee from employee_data dictionary
+        del employee_data[selected_employee_id]
+
+        # Save the updated employee_data to the file
+        with open('employee.dat', 'wb') as employee_file:
+            pickle.dump(employee_data, employee_file)
+
+        # Delete the selected employee from the table
+        self.table.delete(selected_item)
+
+    def modify_employee(self):
+
+        selected_item = self.table.focus()
+        item_data = self.table.item(selected_item)
+
+        if not selected_item:
+            return
+
+        emp_values = item_data['values']
+        emp_id = emp_values[0]
+
+        edit_employee_page = tk.Toplevel(self.root)
+        edit_employee_page.title("Edit Employee")
+
+        # Create and place the input fields and labels for employees
+        name_label = tk.Label(edit_employee_page, text="Name:")
+        name_label.grid(row=0, column=0)
+        name_entry = tk.Entry(edit_employee_page)
+        name_entry.insert(0, emp_values[1])
+        name_entry.grid(row=0, column=1)
+
+        id_label = tk.Label(edit_employee_page, text="ID:")
+        id_label.grid(row=1, column=0)
+        id_entry = tk.Entry(edit_employee_page)
+        id_entry.insert(0, emp_values[0])
+        id_entry.grid(row=1, column=1)
+
+        department_label = tk.Label(edit_employee_page, text="Department:")
+        department_label.grid(row=2, column=0)
+        department_entry = tk.Entry(edit_employee_page)
+        department_entry.insert(0, emp_values[2])
+        department_entry.grid(row=2, column=1)
+
+        job_title_label = tk.Label(edit_employee_page, text="Job Title:")
+        job_title_label.grid(row=3, column=0)
+        job_title_var = tk.StringVar(edit_employee_page)
+        job_title_var.set(emp_values[3])
+        job_title_menu = tk.OptionMenu(edit_employee_page, job_title_var, "Manager", "Salesperson", "sales Manager,",
+                                       "customer Service", "Service Technicians")
+        job_title_menu.grid(row=3, column=1)
+
+        salary_label = tk.Label(edit_employee_page, text="Basic Salary:")
+        salary_label.grid(row=4, column=0)
+        salary_entry = tk.Entry(edit_employee_page)
+        salary_entry.insert(0, emp_values[4])
+        salary_entry.grid(row=4, column=1)
+
+        gender_label = tk.Label(edit_employee_page, text="Job Title:")
+        gender_label.grid(row=5, column=0)
+        gender_var = tk.StringVar(edit_employee_page)
+        gender_var.set(emp_values[5])
+        gender_menu = tk.OptionMenu(edit_employee_page, gender_var, "Male", "Female")
+        gender_menu.grid(row=5, column=1)
+
+        birthday_label = tk.Label(edit_employee_page, text="Birthday:")
+        birthday_label.grid(row=6, column=0)
+        birthday_entry = tk.Entry(edit_employee_page)
+        birthday_entry.insert(0, emp_values[6])
+        birthday_entry.grid(row=6, column=1)
+
+        phone_number_label = tk.Label(edit_employee_page, text="Phone Number:")
+        phone_number_label.grid(row=7, column=0)
+        phone_number_entry = tk.Entry(edit_employee_page)
+        phone_number_entry.insert(0, emp_values[7])
+        phone_number_entry.grid(row=7, column=1)
+
+        experience_label = tk.Label(edit_employee_page, text="Experience:")
+        experience_label.grid(row=8, column=0)
+        experience_entry = tk.Entry(edit_employee_page)
+        experience_entry.insert(0, emp_values[8])
+        experience_entry.grid(row=8, column=1)
+
+        passport_label = tk.Label(edit_employee_page, text="Passport Details:")
+        passport_label.grid(row=9, column=0)
+        passport_entry = tk.Entry(edit_employee_page)
+        passport_entry.insert(0, emp_values[9])
+        passport_entry.grid(row=9, column=1)
+
+        save_button = tk.Button(edit_employee_page, text="Save",
+                                command=lambda: self.save_employee_changes(emp_id, name_entry, id_entry,
+                                                                           department_entry, job_title_var,
+                                                                           salary_entry, gender_var, birthday_entry,
+                                                                           phone_number_entry, experience_entry,
+                                                                           passport_entry, selected_item))
+        save_button.grid(row=10, column=0)
+
+    def save_employee_changes(self, emp_id, name_entry, id_entry, department_entry, job_title_var, salary_entry,
+                              gender_var, birthday_entry, phone_number_entry, experience_entry, passport_entry,
+                              selected_item):
+        new_name = name_entry.get()
+        new_emp_id = id_entry.get()
+        new_department = department_entry.get()
+        new_job_title = job_title_var.get()
+        new_basic_salary = salary_entry.get()
+        new_gender = gender_var.get()
+        new_birthday = birthday_entry.get()
+        new_phone_number = phone_number_entry.get()
+        new_experience = experience_entry.get()
+        new_passport_details = passport_entry.get()
+
+        # Check if any fields are empty
+        if not (
+                name_entry.get() and id_entry.get() and department_entry.get() and job_title_var.get() and salary_entry.get() and gender_var.get() and birthday_entry.get() and phone_number_entry.get() and experience_entry.get() and passport_entry.get()):
+            tk.messagebox.showinfo("Input Error", "Please fill all fields.")
+            return
+
+        # Check if user is trying to change the employee ID
+        try:
+            # Check if user is trying to change the employee ID
+            if str(new_emp_id) != str(emp_id):
+                tk.messagebox.showerror("Invalid Operation", "Changing an employee's ID is not allowed.")
+                return
+        except Exception as e:
+            print(f'Error during ID comparison: {e}')
+
+        employee_data[new_emp_id] = {"Name": new_name, "ID": new_emp_id, "Department": new_department,
+                                     "Job Title": new_job_title, "Basic Salary": new_basic_salary, "Gender": new_gender,
+                                     "Birthday": new_birthday, "Phone Number": new_phone_number,
+                                     "Experience": new_experience, "Passport Details": new_passport_details}
+
+        # Save updated employee_data to the file
+        with open('employee.dat', 'wb') as employee_file:
+            pickle.dump(employee_data, employee_file)
+
+        # Update the table
+        self.table.item(selected_item, values=( new_emp_id, new_name, new_department, new_job_title, new_basic_salary, new_gender, new_birthday,
+        new_phone_number, new_experience, new_passport_details))
+        # Close the edit_employee_page
+        name_entry.master.destroy()
+
+
+
+
+    def update_employee_listbox(self):
+        # Clear the employee_listbox
+        self.employee_listbox.delete(0, tk.END)
+        # Loop through the employee_data dictionary and add each employee's name and job title to the employee_listbox
+        for emp_id, emp_info in employee_data.items():
+            self.employee_listbox.insert(tk.END, f"{emp_id}: {emp_info['Name']} - {emp_info['Department']} - {emp_info['Job Title']} - {emp_info['Basic Salary']} - {emp_info['Gender']} - {emp_info['Birthday']} - {emp_info['Phone Number']} - {emp_info['Experience']} - {emp_info['Passport Details']} ")
+
+
+    def open_vehicle_page(self):
+        # Create a new window for vehicle management
+        vehicle_page = tk.Toplevel(self.root)
+        vehicle_page.title("Car Management")
+        # Create a table to display the vehicle data
+
+        self.table = ttk.Treeview(vehicle_page, columns=(
+            'ID Number', 'Name', 'Model', 'Price', 'Type', 'Color', 'Max Speed', 'Number of Doors',
+            'Number of Wheels', 'Fuel Type', 'Shape'), show='headings')
+        # Set the headings of the table
+        self.table.heading('ID Number', text='ID Number')
+        self.table.heading('Name', text='Name')
+        self.table.heading('Model', text='Model')
+        self.table.heading('Price', text='Price')
+        self.table.heading('Type', text='Type')
+        self.table.heading('Color', text='Color')
+        self.table.heading('Max Speed', text='Max Speed')
+        self.table.heading('Number of Doors', text='Number of Doors')
+        self.table.heading('Number of Wheels', text='Number of Wheels')
+        self.table.heading('Fuel Type', text='Fuel Type')
+        self.table.heading('Shape', text='Shape')
+        self.table.grid(row=11, columnspan=3, pady=20)
+        # Set the width of each column in the table
+        self.table.column('ID Number', width=120)
+        self.table.column('Name', width=120)
+        self.table.column('Model', width=120)
+        self.table.column('Price', width=120)
+        self.table.column('Type', width=120)
+        self.table.column('Color', width=120)
+        self.table.column('Max Speed', width=120)
+        self.table.column('Number of Doors', width=120)
+        self.table.column('Number of Wheels', width=120)
+        self.table.column('Fuel Type', width=120)
+        self.table.column('Shape', width=120)
+
+        # Load the vehicle data from file and insert it into the table
+        with open("vehicle.dat", "rb") as f:
+            vehicle_data = pickle.load(f)
+            for vehicle_id, vehicle_info in vehicle_data.items():
+                # Get the vehicle information from the dictionary
+
+                vehicle_model = vehicle_info.get('Model', vehicle_info.get('model', ''))
+                vehicle_type = vehicle_info.get('Type', vehicle_info.get('type', ''))
+                vehicle_color = vehicle_info.get('Color', vehicle_info.get('color', ''))
+                vehicle_max_speed = vehicle_info.get('Max Speed', vehicle_info.get('maxspeed', ''))
+                vehicle_numOfDoors = vehicle_info.get('Number of Doors', vehicle_info.get('numOfDoors', ''))
+                vehicle_numOfWheels = vehicle_info.get('Number of Wheels', vehicle_info.get('numOfWheels', ''))
+                vehicle_fuelType = vehicle_info.get('Fuel Type', vehicle_info.get('fuelType', ''))
+                vehicle_shape = vehicle_info.get('Shape', vehicle_info.get('shape', ''))
+                # Insert the vehicle information into the table
+                self.table.insert('', 'end',
+                                  values=(
+                                  vehicle_id, vehicle_info['Name'], vehicle_model, vehicle_info['price'], vehicle_type,
+                                  vehicle_color, vehicle_max_speed, vehicle_numOfDoors, vehicle_numOfWheels,
+                                  vehicle_fuelType, vehicle_shape))
+
+                # Create and place the input fields and labels for vehicle
+        id_label = tk.Label(vehicle_page, text="ID Number:")
+        id_label.grid(row=0, column=0)
+        id_entry = tk.Entry(vehicle_page)
+        id_entry.grid(row=0, column=1)
+
+        name_label = tk.Label(vehicle_page, text="Name:")
+        name_label.grid(row=1, column=0)
+        name_entry = tk.Entry(vehicle_page)
+        name_entry.grid(row=1, column=1)
+
+        model_label = tk.Label(vehicle_page, text="Model:")
+        model_label.grid(row=2, column=0)
+        model_entry = tk.Entry(vehicle_page)
+        model_entry.grid(row=2, column=1)
+
+
+        price_label = tk.Label(vehicle_page, text="Price:")
+        price_label.grid(row=3, column=0)
+        price_entry = tk.Entry(vehicle_page)
+        price_entry.grid(row=3, column=1)
+
+        type_label = tk.Label(vehicle_page, text="type:")
+        type_label.grid(row=4, column=0)
+        type_entry = tk.Entry(vehicle_page)
+        type_entry.grid(row=4, column=1)
+
+        color_label = tk.Label(vehicle_page, text="Color:")
+        color_label.grid(row=5, column=0)
+        color_var = tk.StringVar(vehicle_page)
+        color_var.set('Red')
+        color_menu = tk.OptionMenu(vehicle_page, color_var, "Red", "Green", "Blue", "White", "Black", "Gray", "Silver", "Pink", "Brown","Orange")
+        color_menu.grid(row=5, column=1)
+
+        max_speed_label = tk.Label(vehicle_page, text="Max Speed:")
+        max_speed_label.grid(row=6, column=0)
+        max_speed_entry = tk.Entry(vehicle_page)
+        max_speed_entry.grid(row=6, column=1)
+
+        numOfDoors_label = tk.Label(vehicle_page, text="Number of Doors:")
+        numOfDoors_label.grid(row=7, column=0)
+        numOfDoors_entry = tk.Entry(vehicle_page)
+        numOfDoors_entry.grid(row=7, column=1)
+
+        numOfWheels_label = tk.Label(vehicle_page, text="Number of Wheels:")
+        numOfWheels_label.grid(row=8, column=0)
+        numOfWheels_entry = tk.Entry(vehicle_page)
+        numOfWheels_entry.grid(row=8, column=1)
+
+        fuelType_label = tk.Label(vehicle_page, text="Fuel Type:")
+        fuelType_label.grid(row=9, column=0)
+        fuelType_var = tk.StringVar(vehicle_page)
+        fuelType_var.set('Electric')
+        fuelType_menu = tk.OptionMenu(vehicle_page, fuelType_var, "Electric", "Fuel")
+        fuelType_menu.grid(row=9, column=1)
+
+        shape_label = tk.Label(vehicle_page, text="Shape:")
+        shape_label.grid(row=10, column=0)
+        shape_entry = tk.Entry(vehicle_page)
+        shape_entry.grid(row=10, column=1)
+
+                # Create and place the buttons for employee management
+        add_button = tk.Button(vehicle_page, text="Add", command=lambda: self.add_vehicle(name_entry, model_entry, id_entry, price_entry, type_entry,
+                                                                        color_var, max_speed_entry, numOfDoors_entry,numOfWheels_entry,fuelType_var, shape_entry))
+        add_button.grid(row=12, column=0, padx=12, pady=12)
+
+        delete_button = tk.Button(vehicle_page, text="Delete", command=self.delete_vehicle)
+        delete_button.grid(row=12, column=1, padx=12, pady=12)
+
+        modify_button = tk.Button(vehicle_page, text="Modify", command=self.modify_vehicle)
+        modify_button.grid(row=12, column=2,padx=12, pady=12)
+
+        # Add Back to Home Page button in the vehicle page
+        back_button = tk.Button(vehicle_page, text="Back to Home Page", command=vehicle_page.destroy)
+        back_button.grid(row=14, column=1, padx=11, pady=11)
+
+    def add_vehicle(self, name_entry,model_entry, id_entry, price_entry, type_entry, color_var, max_speed_entry, numOfDoors_entry, numOfWheels_entry, fuelType_var,shape_entry):
+        # Retrieve input data
+        name = name_entry.get()
+        model=model_entry.get()
+        vehicle_id = (id_entry.get())
+        price = price_entry.get()
+        vehicle_type = type_entry.get()
+        color = color_var.get()
+        max_speed = max_speed_entry.get()
+        numOfDoors = numOfDoors_entry.get()
+        numOfWheels = numOfWheels_entry.get()
+        fuel_Type = fuelType_var.get()
+        shape = shape_entry.get()
+
+        # Check if any fields are empty
+        if not (
+                name_entry.get() and model_entry.get() and id_entry.get() and price_entry.get() and type_entry.get() and max_speed_entry.get() and numOfDoors_entry.get()
+                and fuelType_var.get() and numOfWheels_entry.get() and shape_entry.get()) :
+            tk.messagebox.showinfo("Input Error", "Please fill all fields.")
+            return
+        # Create a dictionary with the vehicle data and add it to the vehicle_data dictionary
+        vehicle_data[vehicle_id] = {"Name": name, "model": model, "ID": vehicle_id, "price": price,
+                                    "Type": vehicle_type, "Color": color, "Max Speed": max_speed,
+                                    "Number of Doors": numOfDoors, "Number of Wheels": numOfWheels,
+                                    "Fuel Type": fuel_Type, "Shape": shape}
+
+        # Save updated vehicle_data to the file
+        with open('vehicle.dat', 'wb') as vehicle_file:
+            pickle.dump(vehicle_data, vehicle_file)
+
+        # Insert the new data into the table
+        self.table.insert('', 'end', values=(vehicle_id, name, model, price, vehicle_type, color, max_speed, numOfDoors,numOfWheels,fuel_Type, shape))
+
+        # Clear the input fields after adding the vehicle
+        name_entry.delete(0, tk.END)
+        id_entry.delete(0, tk.END)
+        price_entry.delete(0, tk.END)
+        type_entry.delete(0, tk.END)
+        color_var.set('Red')
+        max_speed_entry.delete(0, tk.END)
+        numOfDoors_entry.delete(0, tk.END)
+        model_entry.delete(0,tk.END)
+        shape_entry.delete(0,tk.END)
+
+    def delete_vehicle(self):
+        # get the currently selected item in the table
+        selected_item = self.table.selection()[0]
+        # get the vehicle ID from the selected item
+        selected_vehicle_id = self.table.item(selected_item, 'values')[0]  # Convert to integer
+
+        # Delete the vehicle from vehicle_data dictionary
+        del vehicle_data[selected_vehicle_id]
+
+        # Save the updated vehicle_data to the file
+        with open('vehicle.dat', 'wb') as vehicle_file:
+            pickle.dump(vehicle_data, vehicle_file)
+
+        # Delete the selected vehicle from the table
+        self.table.delete(selected_item)
+
+    def modify_vehicle(self):
+        # Get the currently selected item from the table
+        selected_item = self.table.focus()
+        # Get the data associated with the selected item
+        item_data = self.table.item(selected_item)
+        # If there is no selected item, return without doing anything
+        if not selected_item:
+            return
+        # Extract the vehicle ID from the selected item's data
+        vehicle_values = item_data['values']
+        vehicle_id = vehicle_values[0]
+        # Create a new window for editing the vehicle
+        edit_vehicle_page = tk.Toplevel(self.root)
+        edit_vehicle_page.title("Edit vehicle")
+
+        # Create and place the input fields and labels for vehicle
+        id_label = tk.Label(edit_vehicle_page, text="ID number:")
+        id_label.grid(row=0, column=0)
+        id_entry = tk.Entry(edit_vehicle_page)
+        id_entry.insert(0, vehicle_values[0])
+        id_entry.grid(row=0, column=1)
+
+        name_label = tk.Label(edit_vehicle_page, text="Name:")
+        name_label.grid(row=1, column=0)
+        name_entry = tk.Entry(edit_vehicle_page)
+        name_entry.insert(0, vehicle_values[1])
+        name_entry.grid(row=1, column=1)
+
+        model_label = tk.Label(edit_vehicle_page, text="Model:")
+        model_label.grid(row=2, column=0)
+        model_entry = tk.Entry(edit_vehicle_page)
+        model_entry.insert(0, vehicle_values[2])
+        model_entry.grid(row=2, column=1)
+
+        price_label = tk.Label(edit_vehicle_page, text="price:")
+        price_label.grid(row=3, column=0)
+        price_entry = tk.Entry(edit_vehicle_page)
+        price_entry.insert(0, vehicle_values[3])
+        price_entry.grid(row=3, column=1)
+
+
+        type_label = tk.Label(edit_vehicle_page, text="Type:")
+        type_label.grid(row=4, column=0)
+        type_entry = tk.Entry(edit_vehicle_page)
+        type_entry.insert(0, vehicle_values[4])
+        type_entry.grid(row=4, column=1)
+
+        color_label = tk.Label(edit_vehicle_page, text="Color:")
+        color_label.grid(row=5, column=0)
+        color_var = tk.StringVar(edit_vehicle_page)
+        color_var.set(vehicle_values[5])
+        color_menu = tk.OptionMenu(edit_vehicle_page, color_var,  "Red", "Green", "Blue", "White", "Black", "Gray", "Silver", "Pink", "Brown","Orange")
+        color_menu.grid(row=5, column=1)
+
+        max_speed_label = tk.Label(edit_vehicle_page, text="Max Speed:")
+        max_speed_label.grid(row=6, column=0)
+        max_speed_entry = tk.Entry(edit_vehicle_page)
+        max_speed_entry.insert(0, vehicle_values[6])
+        max_speed_entry.grid(row=6, column=1)
+
+        numOfDoors_label = tk.Label(edit_vehicle_page, text="Number of Doors:")
+        numOfDoors_label.grid(row=7, column=0)
+        numOfDoors_entry = tk.Entry(edit_vehicle_page)
+        numOfDoors_entry.insert(0, vehicle_values[7])
+        numOfDoors_entry.grid(row=7, column=1)
+
+        numOfWheels_label = tk.Label(edit_vehicle_page, text="Number of Wheels:")
+        numOfWheels_label.grid(row=8, column=0)
+        numOfWheels_entry = tk.Entry(edit_vehicle_page)
+        numOfWheels_entry.insert(0,vehicle_values[8])
+        numOfWheels_entry.grid(row=8, column=1)
+
+        fuelType_label = tk.Label(edit_vehicle_page, text="Fuel Type:")
+        fuelType_label.grid(row=9, column=0)
+        fuelType_var = tk.StringVar(edit_vehicle_page)
+        fuelType_var.set(vehicle_values[9])
+        fuelType_menu = tk.OptionMenu(edit_vehicle_page, fuelType_var, "Electric", "Fuel")
+        fuelType_menu.grid(row=9, column=1)
+
+        shape_label = tk.Label(edit_vehicle_page, text="Shape:")
+        shape_label.grid(row=10, column=0)
+        shape_entry = tk.Entry(edit_vehicle_page)
+        shape_entry.insert(0,vehicle_values[10])
+        shape_entry.grid(row=10, column=1)
+# create button
+        save_button = tk.Button(edit_vehicle_page, text="Save",
+                                command=lambda: self.save_vehicle_changes(vehicle_id, name_entry, model_entry, id_entry, price_entry, type_entry, color_var, max_speed_entry, numOfDoors_entry, numOfWheels_entry, fuelType_var, shape_entry, selected_item))
+        save_button.grid(row=12, column=0, padx=12, pady=12)
+
+    def save_vehicle_changes(self, vehicle_id, name_entry, model_entry,id_entry, price_entry, type_entry, color_var, max_speed_entry, numOfDoors_entry, numOfWheels_entry, fuelType_var, shape_entry, selected_item):
+        # Get the new values entered by the user
+        new_name = name_entry.get()
+        new_vehicle_id = id_entry.get()
+        new_price = price_entry.get()
+        new_type = type_entry.get()
+        new_color = color_var.get()
+        new_max_speed = max_speed_entry.get()
+        new_numOfDoors = numOfDoors_entry.get()
+        new_model = model_entry.get()
+        new_numberOfWheels = numOfWheels_entry.get()
+        new_fuleType = fuelType_var.get()
+        new_shape = shape_entry.get()
+        # Check if all fields are filled
+        if not (
+                name_entry.get() and model_entry.get() and id_entry.get() and price_entry.get() and type_entry.get() and max_speed_entry.get()
+                and numOfDoors_entry.get() and numOfWheels_entry.get() and fuelType_var.get() and shape_entry.get()):
+            tk.messagebox.showinfo("Input Error", "Please fill all fields.")
+            return
+
+        try:
+            # Check if the user changed the vehicle ID, which is not allowed
+            if str(new_vehicle_id) != str(vehicle_id):
+                tk.messagebox.showerror("Invalid Operation", "Changing a vehicle ID is not allowed.")
+                return
+        except Exception as e:
+            print(f'Error during ID comparison: {e}')
+        # Update vehicle_data dictionary with new values
+        vehicle_data[new_vehicle_id] = {"Name": new_name, "model": new_model, "ID": new_vehicle_id, "price": new_price,
+                                        "Type": new_type, "Color": new_color, "maxspeed": new_max_speed,
+                                        "Number of Doors": new_numOfDoors, "Number of Wheels": new_numberOfWheels,
+                                        "Fuel Type": new_fuleType, "Shape": new_shape}
+
+        # Save updated vehicle_data to the file
+        with open('vehicle.dat', 'wb') as vehicle_file:
+            pickle.dump(vehicle_data, vehicle_file)
+        # Update the table with new values
+        self.table.item(selected_item, values=(new_vehicle_id, new_name, new_model, new_price, new_type, new_color, new_max_speed, new_numOfDoors,new_numberOfWheels,new_fuleType,new_shape))
+
+        # Close the edit_vehicle_page
+        name_entry.master.destroy()
+
+
+    def update_vehicle_listbox(self):
+        # Clear the vehicle_listbox
+        self.vehicle_listbox.delete(0, tk.END)
+        # Add each vehicle to the vehicle_listbox
+        for vehicle_id, vehicle_info in vehicle_data.items():
+            self.vehicle_listbox.insert(tk.END,
+                                    f"{vehicle_id}: {vehicle_info['Name']} - {vehicle_info['price']} - {vehicle_info['Type']} - {vehicle_info['Shape']}-{vehicle_info['Color']} - {vehicle_info['Max Speed']} - {vehicle_info['Number Of Doors']} - {vehicle_info['Number of Wheels']}-{vehicle_info['Fuel Type']} - {vehicle_info['model']}")
+
+
+
+
+
+if __name__ == '__main__':
+    gui = SystemGUI()
